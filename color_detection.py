@@ -18,6 +18,7 @@ while True:
     upper_redB = np.array([180, 255, 255])
 
     mask = cv2.inRange(hsv, lower_redA, upper_redA) | cv2.inRange(hsv, lower_redB, upper_redB)
+    fps = cap.get(cv2.CAP_PROP_FPS)
 
     result = cv2.bitwise_and(frame, frame, mask=mask)
 
@@ -32,6 +33,7 @@ while True:
     if cv2.waitKey(1) == ord('q'):
         for i in sequence:
             print(sequence[i], end="")
+        print("FPS: ", fps)
         break
 
 cap.release()
