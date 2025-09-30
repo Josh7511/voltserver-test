@@ -33,6 +33,7 @@ while True:
     if cv2.waitKey(1) == ord('q'):
         for i in sequence:
             print(sequence[i], end="")
+        print(" ")
         print("FPS: ", fps)
         break
 
