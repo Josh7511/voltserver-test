@@ -5,13 +5,14 @@ cap = cv2.VideoCapture(1)
 
 sequence = []
 
+
 while True:
     ret, frame = cap.read()
     width = int(cap.get(3))
     height = int(cap.get(4))
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    lower_red = np.array([0, 190, 45]) 
+    lower_red = np.array([0, 180, 45]) 
     upper_red = np.array([10, 255, 255])
 
     mask = cv2.inRange(hsv, lower_red, upper_red)
