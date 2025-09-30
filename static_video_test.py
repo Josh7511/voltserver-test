@@ -1,12 +1,12 @@
 import numpy as np
 import cv2
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture('test_video.mp4')
 
 sequence = []
 
 
-while True:
+while cap.isOpened():
     ret, frame = cap.read()
     width = int(cap.get(3))
     height = int(cap.get(4))
@@ -25,17 +25,13 @@ while True:
     cv2.imshow('frame', result)
     cv2.imshow('mask', mask)
 
-    if np.sum(mask) > 0:
+    if cv2.countNonZero(mask) > 0:
         sequence.append(1)
     else:
         sequence.append(0)
 
     if cv2.waitKey(1) == ord('q'):
-        for i in range(len(sequence)):
-            if i > 0 and sequence[i-1] == 0 and sequence[i] == 1:
-                print(" ", end="")
-            elif i > 0 and sequence[i-1] == 1 and sequence[i] == 0:
-                print(" ", end="")
+        for i in sequence:
             print(sequence[i], end="")
         print(" ")
         print("FPS: ", fps)
