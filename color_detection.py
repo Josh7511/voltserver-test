@@ -4,6 +4,9 @@ import cv2
 cap = cv2.VideoCapture(1)
 
 sequence = []
+list_result = [[]]
+
+
 
 
 while True:
@@ -32,13 +35,13 @@ while True:
 
     if cv2.waitKey(1) == ord('q'):
         for i in range(len(sequence)):
-            if i > 0 and sequence[i-1] == 0 and sequence[i] == 1:
-                print(" ", end="")
-            elif i > 0 and sequence[i-1] == 1 and sequence[i] == 0:
-                print(" ", end="")
+            if i > 0 and (sequence[i-1] == 0 and sequence[i] == 1 or sequence[i-1] == 1 and sequence[i] == 0):
+                list_result.append([])
+            list_result[-1].append(sequence[i])
             print(sequence[i], end="")
         print(" ")
         print("FPS: ", fps)
+        print("result:", list_result)
         break
 
 cap.release()

@@ -1,0 +1,6 @@
+for loop throught base sequence
+    if (previous index is 0 and current index is 1 or vice versa)
+        create new list in list
+        put value in the list
+    else
+        put value in the list
