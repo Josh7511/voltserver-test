@@ -4,3 +4,9 @@ for loop throught base sequence
         put value in the list
     else
         put value in the list
+
+time_sequence = []
+
+for list in list_result:
+    time = list.size()/FPS 
+    time += time_seqeunce

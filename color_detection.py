@@ -5,6 +5,7 @@ cap = cv2.VideoCapture(1)
 
 sequence = []
 list_result = [[]]
+time_sequence = []
 
 
 
@@ -39,9 +40,12 @@ while True:
                 list_result.append([])
             list_result[-1].append(sequence[i])
             print(sequence[i], end="")
+        for list in list_result:
+            time_sequence.append(len(list)/fps)
         print(" ")
         print("FPS: ", fps)
         print("result:", list_result)
+        print("time sequence:", time_sequence)
         break
 
 cap.release()
