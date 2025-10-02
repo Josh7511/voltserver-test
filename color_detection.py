@@ -35,13 +35,18 @@ while True:
         sequence.append(0)
 
     if cv2.waitKey(1) == ord('q'):
+
+        #stores sequences into subseqeunces
         for i in range(len(sequence)):
             if i > 0 and (sequence[i-1] == 0 and sequence[i] == 1 or sequence[i-1] == 1 and sequence[i] == 0):
                 list_result.append([])
             list_result[-1].append(sequence[i])
             print(sequence[i], end="")
+        
+        # calucaltes time of each sequence
         for list in list_result:
             time_sequence.append(len(list)/fps)
+
         print(" ")
         print("FPS: ", fps)
         print("result:", list_result)
