@@ -1,13 +1,17 @@
 import numpy as np
 import cv2
 
-cap = cv2.VideoCapture('test_video.mp4')
+cap = cv2.VideoCapture('test.mp4')
 
 sequence = []
+list_result = [[]]
+time_sequence = []
 
 
-while cap.isOpened():
+while True:
     ret, frame = cap.read()
+    if not ret:
+        break
     width = int(cap.get(3))
     height = int(cap.get(4))
 
@@ -22,20 +26,27 @@ while cap.isOpened():
 
     result = cv2.bitwise_and(frame, frame, mask=mask)
 
-    cv2.imshow('frame', result)
-    cv2.imshow('mask', mask)
-
-    if cv2.countNonZero(mask) > 0:
+    if np.sum(mask) > 0:
         sequence.append(1)
     else:
         sequence.append(0)
+    
 
-    if cv2.waitKey(1) == ord('q'):
-        for i in sequence:
-            print(sequence[i], end="")
-        print(" ")
-        print("FPS: ", fps)
-        break
+#stores sequences into subseqeunces
+for i in range(len(sequence)):
+    if i > 0 and (sequence[i-1] == 0 and sequence[i] == 1 or sequence[i-1] == 1 and sequence[i] == 0):
+        list_result.append([])
+    list_result[-1].append(sequence[i])
+    print(sequence[i], end="")
+
+# calucaltes time of each sequence
+for list in list_result:
+    time_sequence.append(len(list)/fps)
+
+print(" ")
+print("FPS: ", fps)
+print("result:", list_result)
+print("time sequence:", time_sequence)
 
 cap.release()
 cv2.destroyAllWindows()

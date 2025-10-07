@@ -8,8 +8,6 @@ list_result = [[]]
 time_sequence = []
 
 
-
-
 while True:
     ret, frame = cap.read()
     width = int(cap.get(3))
