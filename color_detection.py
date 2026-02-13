@@ -1,12 +1,11 @@
 import numpy as np
 import cv2
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 sequence = []
 list_result = [[]]
 time_sequence = []
-
 
 while True:
     ret, frame = cap.read()
