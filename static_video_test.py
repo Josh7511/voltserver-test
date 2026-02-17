@@ -1,11 +1,17 @@
 import numpy as np
 import cv2
 
-cap = cv2.VideoCapture('test.mp4')
+cap = cv2.VideoCapture('video.mov')
 
 sequence = []
 list_result = [[]]
 time_sequence = []
+
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+fps = cap.get(cv2.CAP_PROP_FPS)
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+out = cv2.VideoWriter('output_masked.mp4', fourcc, fps, (width, height))
 
 
 while True:
@@ -25,12 +31,15 @@ while True:
     fps = cap.get(cv2.CAP_PROP_FPS)
 
     result = cv2.bitwise_and(frame, frame, mask=mask)
+    out.write(result)
+
 
     if np.sum(mask) > 0:
         sequence.append(1)
     else:
         sequence.append(0)
     
+out.release()
 
 #stores sequences into subseqeunces
 for i in range(len(sequence)):

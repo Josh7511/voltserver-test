@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>LED Blink Simulator</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background: #111;
+        color: white;
+    }
+
+    #led {
+        width: 200px;
+        height: 200px;
+        margin: 40px auto;
+        border-radius: 50%;
+        background: black;
+        box-shadow: 0 0 20px #000;
+        transition: background 0.05s, box-shadow 0.05s;
+    }
+
+    .controls {
+        margin: 20px;
+    }
+
+    input {
+        width: 120px;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 10px;
+        font-size: 16px;
+    }
+</style>
+</head>
+<body>
+
+<h1>LED Blink Simulator</h1>
+
+<div id="led"></div>
+
+<div class="controls">
+    <label>Cycle Time (ms):</label>
+    <input type="number" id="cycle" value="500" min="10">
+</div>
+
+<div class="controls">
+    <label>Duty Cycle (%):</label>
+    <input type="number" id="duty" value="50" min="1" max="99">
+</div>
+
+<div class="controls">
+    <label>Color:</label>
+    <select id="color">
+        <option value="red">Red</option>
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+        <option value="yellow">Yellow</option>
+        <option value="white">White</option>
+    </select>
+</div>
+
+<div class="controls">
+    <button onclick="startBlink()">Start</button>
+    <button onclick="stopBlink()">Stop</button>
+</div>
+
+<p id="freq"></p>
+
+<script>
+let interval;
+let isOn = false;
+
+function startBlink() {
+    stopBlink();
+
+    const cycle = parseInt(document.getElementById("cycle").value);
+    const duty = parseInt(document.getElementById("duty").value);
+    const color = document.getElementById("color").value;
+
+    const onTime = cycle * (duty / 100);
+    const offTime = cycle - onTime;
+
+    document.getElementById("freq").innerText =
+        "Frequency: " + (1000 / cycle).toFixed(2) + " Hz";
+
+    function blink() {
+        if (isOn) {
+            document.getElementById("led").style.background = "black";
+            document.getElementById("led").style.boxShadow = "0 0 20px #000";
+            setTimeout(blink, offTime);
+        } else {
+            document.getElementById("led").style.background = color;
+            document.getElementById("led").style.boxShadow =
+                "0 0 40px " + color + ", 0 0 80px " + color;
+            setTimeout(blink, onTime);
+        }
+        isOn = !isOn;
+    }
+
+    blink();
+}
+
+function stopBlink() {
+    clearInterval(interval);
+    document.getElementById("led").style.background = "black";
+    document.getElementById("led").style.boxShadow = "0 0 20px #000";
+    isOn = false;
+}
+</script>
+
+</body>
+</html>
