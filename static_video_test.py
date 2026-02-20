@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-cap = cv2.VideoCapture('video.mov')
+cap = cv2.VideoCapture('movie.mp4')
 
 sequence = []
 list_result = [[]]
@@ -12,6 +12,8 @@ fps = cap.get(cv2.CAP_PROP_FPS)
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 out = cv2.VideoWriter('output_masked.mp4', fourcc, fps, (width, height))
+# HSV visualization video (no mask applied)
+out_hsv = cv2.VideoWriter('output_hsv.mp4', fourcc, fps, (width, height))
 
 
 while True:
@@ -22,12 +24,18 @@ while True:
     height = int(cap.get(4))
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    lower_redA = np.array([0, 180, 45]) 
-    upper_redA = np.array([10, 255, 255])
-    lower_redB = np.array([170, 180, 45])
+    # Save full HSV image (converted back to BGR for viewing) without any mask
+    hsv_bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+    out_hsv.write(hsv_bgr)
+
+    # Looser red bounds so compression/lighting shifts don't drop the LED in/out
+    lower_redA = np.array([0, 100, 45])
+    upper_redA = np.array([15, 255, 255])
+    lower_redB = np.array([165, 100, 45])
     upper_redB = np.array([180, 255, 255])
 
     mask = cv2.inRange(hsv, lower_redA, upper_redA) | cv2.inRange(hsv, lower_redB, upper_redB)
+    
     fps = cap.get(cv2.CAP_PROP_FPS)
 
     result = cv2.bitwise_and(frame, frame, mask=mask)
@@ -38,8 +46,11 @@ while True:
         sequence.append(1)
     else:
         sequence.append(0)
+
+    
     
 out.release()
+out_hsv.release()
 
 #stores sequences into subseqeunces
 for i in range(len(sequence)):

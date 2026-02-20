@@ -18,7 +18,7 @@
         border-radius: 50%;
         background: black;
         box-shadow: 0 0 20px #000;
-        transition: background 0.05s, box-shadow 0.05s;
+        /* transition removed for instant switching */
     }
 
     .controls {
@@ -35,6 +35,7 @@
         font-size: 16px;
     }
 </style>
+
 </head>
 <body>
 
@@ -71,32 +72,36 @@
 <p id="freq"></p>
 
 <script>
-let interval;
+let blinkTimeoutId = null;
 let isOn = false;
 
 function startBlink() {
     stopBlink();
 
-    const cycle = parseInt(document.getElementById("cycle").value);
-    const duty = parseInt(document.getElementById("duty").value);
+    const cycleMs = parseInt(document.getElementById("cycle").value, 10);
+    const duty = parseInt(document.getElementById("duty").value, 10);
     const color = document.getElementById("color").value;
 
-    const onTime = cycle * (duty / 100);
-    const offTime = cycle - onTime;
+    if (cycleMs < 10) return;
+    const dutyPct = Math.max(1, Math.min(99, duty)) / 100;
+    const onTime = Math.round(cycleMs * dutyPct);
+    const offTime = cycleMs - onTime;
 
     document.getElementById("freq").innerText =
-        "Frequency: " + (1000 / cycle).toFixed(2) + " Hz";
+        "Rate: " + (1000 / cycleMs).toFixed(2) + " Hz  |  ON: " + onTime + " ms  OFF: " + offTime + " ms";
+
+    const led = document.getElementById("led");
 
     function blink() {
         if (isOn) {
-            document.getElementById("led").style.background = "black";
-            document.getElementById("led").style.boxShadow = "0 0 20px #000";
-            setTimeout(blink, offTime);
+            led.style.background = "black";
+            led.style.boxShadow = "0 0 20px #000";
+            blinkTimeoutId = setTimeout(blink, offTime);
         } else {
-            document.getElementById("led").style.background = color;
-            document.getElementById("led").style.boxShadow =
+            led.style.background = color;
+            led.style.boxShadow =
                 "0 0 40px " + color + ", 0 0 80px " + color;
-            setTimeout(blink, onTime);
+            blinkTimeoutId = setTimeout(blink, onTime);
         }
         isOn = !isOn;
     }
@@ -105,7 +110,10 @@ function startBlink() {
 }
 
 function stopBlink() {
-    clearInterval(interval);
+    if (blinkTimeoutId !== null) {
+        clearTimeout(blinkTimeoutId);
+        blinkTimeoutId = null;
+    }
     document.getElementById("led").style.background = "black";
     document.getElementById("led").style.boxShadow = "0 0 20px #000";
     isOn = false;
