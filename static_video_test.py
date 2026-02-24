@@ -52,6 +52,11 @@ while True:
 out.release()
 out_hsv.release()
 
+# Correct single isolated bit flips (one-off noise)
+for i in range(1, len(sequence) - 1):
+    if sequence[i - 1] == sequence[i + 1] and sequence[i] != sequence[i - 1]:
+        sequence[i] = sequence[i - 1]
+
 #stores sequences into subseqeunces
 for i in range(len(sequence)):
     if i > 0 and (sequence[i-1] == 0 and sequence[i] == 1 or sequence[i-1] == 1 and sequence[i] == 0):
