@@ -36,7 +36,11 @@ while True:
     upper_redB = np.array([180, 255, 255])
 
     mask = cv2.inRange(hsv, lower_redA, upper_redA) | cv2.inRange(hsv, lower_redB, upper_redB)
-    
+
+    kernel = np.ones((3, 3), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+
     fps = cap.get(cv2.CAP_PROP_FPS)
 
     result = cv2.bitwise_and(frame, frame, mask=mask)
