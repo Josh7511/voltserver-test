@@ -1,5 +1,10 @@
 import numpy as np
 import cv2
+from itertools import dropwhile
+
+
+def remove_leading_zeros(sequence: list):
+    return list(dropwhile(lambda x: x == 0, sequence))
 
 cap = cv2.VideoCapture('movie.mp4')
 
@@ -56,6 +61,8 @@ while True:
     
 out.release()
 out_hsv.release()
+
+sequence = remove_leading_zeros(sequence)
 
 # Correct single isolated bit flips (one-off noise)
 for i in range(1, len(sequence) - 1):
