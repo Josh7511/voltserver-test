@@ -6,6 +6,7 @@ cap = cv2.VideoCapture('movie.mp4')
 sequence = []
 list_result = [[]]
 time_sequence = []
+min_led_area = 30
 
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 fps = cap.get(cv2.CAP_PROP_FPS)
@@ -42,7 +43,7 @@ while True:
     out.write(result)
 
 
-    if np.sum(mask) > 0:
+    if np.sum(mask) > min_led_area:
         sequence.append(1)
     else:
         sequence.append(0)
