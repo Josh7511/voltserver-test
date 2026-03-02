@@ -1,4 +1,5 @@
 #Note each sequence starts with LED on currently, may have to update program since PERM Fault is alternating
+#Note sequences are in the follow format [on_1, off_1, on_2, off_2, ...] in seconds.
 
 BLINK_SEQUENCES = {
     "Init": {
