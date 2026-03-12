@@ -51,13 +51,59 @@ BLINK_SEQUENCES = {
         "G": [],
         "B": [],
     },
-    "Permanent Fault": {
+    "Permanent Fault Load Connection": {
         # R/B  200 ms @ 50 %  alternating
         # Each color: 100 ms on, 100 ms off (while the other color is on)
+        # 2 blinks
+        "R": [0.1, 0.1, 0.1, 0.1],
+        "G": [],
+        "B": [0.1, 0.1, 0.1, 0.1],
+    },
+    "Permanent Fault Overload": {
+        # R/B  200 ms @ 50 %  alternating
+        # Each color: 100 ms on, 100 ms off (while the other color is on)
+        # 3 blinks
+        "R": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+        "G": [],
+        "B": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    },
+
+    "Permanent Fault Transmitter": {
+        # R/B  200 ms @ 50 %  alternating
+        # Each color: 100 ms on, 100 ms off (while the other color is on)
+        # 4 blinks
         "R": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
         "G": [],
         "B": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
     },
+
+    "Permanent Fault Temperature": {
+        # R/B  200 ms @ 50 %  alternating
+        # Each color: 100 ms on, 100 ms off (while the other color is on)
+        # 5 blinks
+        "R": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+        "G": [],
+        "B": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    },
+
+    "Permanent Fault Short Circuit": {
+        # R/B  200 ms @ 50 %  alternating
+        # Each color: 100 ms on, 100 ms off (while the other color is on)
+        # 6 blinks
+        "R": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+        "G": [],
+        "B": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    },
+
+    "Permanent Fault Internal Failure": {
+        # R/B  200 ms @ 50 %  alternating
+        # Each color: 100 ms on, 100 ms off (while the other color is on)
+        # 8 blinks
+        "R": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+        "G": [],
+        "B": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    },
+
     "Live ID": {
         # B  1000 ms @ 25 %  →  250 ms on / 750 ms off
         "R": [],
