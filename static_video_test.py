@@ -8,6 +8,14 @@ def remove_leading_zeros(sequence: list):
     return list(dropwhile(lambda x: x == 0, sequence))
 
 
+def largest_cluster_area(mask) -> float:
+    """Return the area of the largest single connected component in a binary mask."""
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        return 0.0
+    return max(cv2.contourArea(c) for c in contours)
+
+
 def build_time_sequence(sequence: list, fps: float) -> tuple[list[list[int]], list[float]]:
     """Segment a binary sequence into runs and convert each run to a duration in seconds."""
     list_result = [[]]
@@ -33,7 +41,7 @@ cap = cv2.VideoCapture('movie.mp4')
 sequence_r = []
 sequence_g = []
 sequence_b = []
-min_led_area = 30
+min_cluster_area = 500  # minimum contiguous pixel cluster to count as LED on
 
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 fps = cap.get(cv2.CAP_PROP_FPS)
@@ -82,21 +90,21 @@ while True:
     result = cv2.bitwise_and(frame, frame, mask=combined_mask)
     out.write(result)
 
-    area_r = int(np.sum(mask_r))
-    area_g = int(np.sum(mask_g))
-    area_b = int(np.sum(mask_b))
+    area_r = largest_cluster_area(mask_r)
+    area_g = largest_cluster_area(mask_g)
+    area_b = largest_cluster_area(mask_b)
 
     # R and B should never be on simultaneously (permanent fault alternates).
     # During LED fade transitions both masks can exceed the threshold, so resolve
     # by keeping only the dominant channel (larger pixel area).
-    r_on = area_r > min_led_area
-    b_on = area_b > min_led_area
+    r_on = area_r > min_cluster_area
+    b_on = area_b > min_cluster_area
     if r_on and b_on:
         r_on = area_r >= area_b
         b_on = not r_on
 
     sequence_r.append(1 if r_on else 0)
-    sequence_g.append(1 if area_g > min_led_area else 0)
+    sequence_g.append(1 if area_g > min_cluster_area else 0)
     sequence_b.append(1 if b_on else 0)
 
 out.release()

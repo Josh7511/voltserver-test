@@ -4,393 +4,430 @@
 <meta charset="UTF-8">
 <title>LED Blink Simulator</title>
 <style>
+    * { box-sizing: border-box; }
+
     body {
         font-family: Arial, sans-serif;
         text-align: center;
         background: #111;
         color: white;
+        margin: 0;
+        padding: 0 0 60px;
     }
 
-    #led {
-        width: 200px;
-        height: 200px;
-        margin: 40px auto;
-        border-radius: 50%;
-        background: black;
-        box-shadow: 0 0 20px #000;
+    h1 { margin: 30px 0 0; font-size: 24px; }
+    h2 { margin: 0 0 4px; font-size: 19px; }
+
+    .panel {
+        border-top: 1px solid #333;
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 28px 20px;
     }
 
-    .controls {
-        margin: 20px;
+    .subtitle {
+        color: #666;
+        font-size: 13px;
+        margin: 2px 0 18px;
     }
 
-    input {
-        width: 120px;
+    .controls { margin: 14px 0; }
+
+    input[type=number] {
+        width: 110px;
+        padding: 5px 8px;
+        background: #1e1e1e;
+        color: white;
+        border: 1px solid #444;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    select {
+        font-size: 14px;
+        padding: 6px 10px;
+        background: #1e1e1e;
+        color: white;
+        border: 1px solid #444;
+        border-radius: 4px;
+        cursor: pointer;
     }
 
     button {
-        padding: 10px 20px;
-        margin: 10px;
-        font-size: 16px;
+        padding: 8px 20px;
+        margin: 5px;
+        font-size: 14px;
+        background: #252525;
+        color: white;
+        border: 1px solid #444;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover { background: #333; }
+
+    /* ── Generic blink LED ── */
+    #led {
+        width: 160px;
+        height: 160px;
+        margin: 24px auto;
+        border-radius: 50%;
+        background: #1a1a1a;
+        box-shadow: 0 0 8px #000;
+        border: 2px solid #2a2a2a;
     }
 
-    /* ── Permanent Fault section ── */
-    .section-divider {
-        border-top: 1px solid #444;
-        margin: 40px auto;
-        padding-top: 30px;
-        max-width: 600px;
-    }
+    #freq { font-size: 13px; color: #666; min-height: 1.4em; }
 
-    .led-pair {
+    /* ── Sequence Library LEDs ── */
+    .sl-led-row {
         display: flex;
         justify-content: center;
-        gap: 60px;
-        margin: 30px auto;
+        gap: 32px;
+        margin: 20px auto 6px;
     }
 
-    .led-container {
+    .sl-led-wrap {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
     }
 
-    .led-container label {
-        font-size: 14px;
-        letter-spacing: 1px;
-        color: #aaa;
+    .sl-led-wrap label {
+        font-size: 12px;
+        color: #666;
         text-transform: uppercase;
+        letter-spacing: 2px;
     }
 
-    .led-dual {
-        width: 120px;
-        height: 120px;
+    .sl-led {
+        width: 88px;
+        height: 88px;
         border-radius: 50%;
         background: #1a1a1a;
-        box-shadow: 0 0 10px #000;
-        border: 2px solid #333;
+        border: 2px solid #2a2a2a;
+        transition: opacity 0.08s;
     }
 
-    .led-dual.on-red {
+    .sl-led.inactive { opacity: 0.18; }
+
+    .sl-led.on-r {
         background: #ff2200;
-        box-shadow: 0 0 30px #ff2200, 0 0 60px #ff2200;
+        box-shadow: 0 0 22px #ff2200, 0 0 48px #ff2200;
         border-color: #ff5533;
     }
-
-    .led-dual.on-blue {
-        background: #0044ff;
-        box-shadow: 0 0 30px #0044ff, 0 0 60px #0044ff;
-        border-color: #3366ff;
+    .sl-led.on-g {
+        background: #00dd44;
+        box-shadow: 0 0 22px #00dd44, 0 0 48px #00dd44;
+        border-color: #33ff66;
+    }
+    .sl-led.on-b {
+        background: #1155ff;
+        box-shadow: 0 0 22px #1155ff, 0 0 48px #1155ff;
+        border-color: #4477ff;
     }
 
-    #fault-select {
-        font-size: 15px;
-        padding: 6px 10px;
-        background: #222;
-        color: white;
-        border: 1px solid #555;
-        border-radius: 4px;
-        min-width: 240px;
-    }
-
-    .fault-badge {
-        display: inline-block;
-        margin-top: 6px;
-        padding: 4px 14px;
-        background: #222;
-        border: 1px solid #555;
-        border-radius: 20px;
+    /* ── Description / info text ── */
+    #sl-desc {
         font-size: 13px;
-        color: #ccc;
-        letter-spacing: 0.5px;
-    }
-
-    #fault-info {
-        font-size: 14px;
-        color: #888;
+        color: #777;
+        margin: 6px 0 0;
         min-height: 1.4em;
     }
 
-    .step-indicator {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin: 16px auto;
-        flex-wrap: wrap;
-        max-width: 400px;
-    }
-
-    .step-dot {
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: #333;
-        border: 1px solid #555;
-        transition: background 0.05s;
-    }
-
-    .step-dot.active-r {
-        background: #ff2200;
-        box-shadow: 0 0 6px #ff2200;
-    }
-
-    .step-dot.active-b {
-        background: #0044ff;
-        box-shadow: 0 0 6px #0044ff;
-    }
+    #sl-select { min-width: 280px; }
 </style>
-
 </head>
 <body>
 
 <h1>LED Blink Simulator</h1>
 
-<div id="led"></div>
+<!-- ════════════════════════════════════ -->
+<!--           CUSTOM BLINK              -->
+<!-- ════════════════════════════════════ -->
+<div class="panel">
+    <h2>Custom Blink</h2>
+    <p class="subtitle">Free-run any color at any cycle and duty cycle</p>
 
-<div class="controls">
-    <label>Cycle Time (ms):</label>
-    <input type="number" id="cycle" value="500" min="10">
+    <div id="led"></div>
+
+    <div class="controls">
+        <label>Cycle (ms): </label>
+        <input type="number" id="cycle" value="500" min="10">
+    </div>
+    <div class="controls">
+        <label>Duty (%): </label>
+        <input type="number" id="duty" value="50" min="1" max="99">
+    </div>
+    <div class="controls">
+        <label>Color: </label>
+        <select id="color">
+            <option value="red">Red</option>
+            <option value="#1155ff">Blue</option>
+            <option value="#00dd44">Green</option>
+            <option value="yellow">Yellow</option>
+            <option value="white">White</option>
+        </select>
+    </div>
+    <div class="controls">
+        <button onclick="startBlink()">Start</button>
+        <button onclick="stopBlink()">Stop</button>
+    </div>
+    <p id="freq"></p>
 </div>
 
-<div class="controls">
-    <label>Duty Cycle (%):</label>
-    <input type="number" id="duty" value="50" min="1" max="99">
-</div>
+<!-- ════════════════════════════════════ -->
+<!--         SEQUENCE LIBRARY            -->
+<!-- ════════════════════════════════════ -->
+<div class="panel">
+    <h2>Sequence Library</h2>
+    <p class="subtitle">All named blink codes from the device spec — exact timings</p>
 
-<div class="controls">
-    <label>Color:</label>
-    <select id="color">
-        <option value="red">Red</option>
-        <option value="blue">Blue</option>
-        <option value="green">Green</option>
-        <option value="yellow">Yellow</option>
-        <option value="white">White</option>
-    </select>
-</div>
-
-<div class="controls">
-    <button onclick="startBlink()">Start</button>
-    <button onclick="stopBlink()">Stop</button>
-</div>
-
-<p id="freq"></p>
-
-<!-- ═══════════════════════════════════════════════════ -->
-<!--              PERMANENT FAULT FAMILY                 -->
-<!-- ═══════════════════════════════════════════════════ -->
-<div class="section-divider">
-    <h2>Permanent Fault Family</h2>
-    <p style="color:#888; font-size:13px; margin-top:-10px;">
-        Red &amp; Blue alternate every 100 ms — blink count encodes the fault type
-    </p>
-
-    <div class="led-pair">
-        <div class="led-container">
-            <div id="fault-led-r" class="led-dual"></div>
-            <label>Red</label>
+    <!-- R / G / B LEDs -->
+    <div class="sl-led-row">
+        <div class="sl-led-wrap">
+            <div id="sl-r" class="sl-led"></div>
+            <label>R</label>
         </div>
-        <div class="led-container">
-            <div id="fault-led-b" class="led-dual"></div>
-            <label>Blue</label>
+        <div class="sl-led-wrap">
+            <div id="sl-g" class="sl-led"></div>
+            <label>G</label>
+        </div>
+        <div class="sl-led-wrap">
+            <div id="sl-b" class="sl-led"></div>
+            <label>B</label>
         </div>
     </div>
 
-    <div class="step-indicator" id="step-dots"></div>
-
+    <!-- Selector -->
     <div class="controls">
-        <label>Fault Type:</label><br><br>
-        <select id="fault-select" onchange="onFaultChange()">
-            <option value="2">Load Connection &nbsp;— 2 blinks</option>
-            <option value="3">Overload &nbsp;— 3 blinks</option>
-            <option value="4">Transmitter &nbsp;— 4 blinks</option>
-            <option value="5">Temperature &nbsp;— 5 blinks</option>
-            <option value="6">Short Circuit &nbsp;— 6 blinks</option>
-            <option value="8">Internal Failure &nbsp;— 8 blinks</option>
+        <select id="sl-select" onchange="onSlChange()">
+            <optgroup label="Normal States">
+                <option value="Init">Init</option>
+                <option value="Wait 1">Wait 1</option>
+                <option value="Wait 2">Wait 2</option>
+                <option value="Wait 3">Wait 3</option>
+                <option value="Precharge">Precharge</option>
+                <option value="Full On">Full On</option>
+                <option value="Software Off">Software Off</option>
+                <option value="Live ID">Live ID</option>
+            </optgroup>
+            <optgroup label="Fault States">
+                <option value="Fault Delay">Fault Delay</option>
+                <option value="Permanent Fault Load Connection">Permanent Fault — Load Connection</option>
+                <option value="Permanent Fault Overload">Permanent Fault — Overload</option>
+                <option value="Permanent Fault Transmitter">Permanent Fault — Transmitter</option>
+                <option value="Permanent Fault Temperature">Permanent Fault — Temperature</option>
+                <option value="Permanent Fault Short Circuit">Permanent Fault — Short Circuit</option>
+                <option value="Permanent Fault Internal Failure">Permanent Fault — Internal Failure</option>
+            </optgroup>
         </select>
     </div>
 
-    <div id="fault-badge-row" style="margin:10px 0;">
-        <span class="fault-badge" id="fault-badge">2 blinks per color &nbsp;|&nbsp; 400 ms pattern &nbsp;|&nbsp; 1 s gap</span>
-    </div>
+    <p id="sl-desc"></p>
 
     <div class="controls">
-        <button onclick="startFault()">Start</button>
-        <button onclick="stopFault()">Stop</button>
+        <button onclick="startSeq()">Start</button>
+        <button onclick="stopSeq()">Stop</button>
     </div>
-
-    <p id="fault-info"></p>
 </div>
 
 <script>
-/* ─── Single-LED blink simulator ─── */
+/* ══════════════════════════════════════════
+   CUSTOM BLINK SIMULATOR
+══════════════════════════════════════════ */
 
-let blinkTimeoutId = null;
-let isOn = false;
+let blinkId = null;
+let blinkOn = false;
 
 function startBlink() {
     stopBlink();
-
-    const cycleMs = parseInt(document.getElementById("cycle").value, 10);
-    const duty = parseInt(document.getElementById("duty").value, 10);
-    const color = document.getElementById("color").value;
-
+    const cycleMs = parseInt(document.getElementById('cycle').value, 10);
+    const duty    = parseInt(document.getElementById('duty').value, 10);
+    const color   = document.getElementById('color').value;
     if (cycleMs < 10) return;
-    const dutyPct = Math.max(1, Math.min(99, duty)) / 100;
-    const onTime = Math.round(cycleMs * dutyPct);
+    const pct     = Math.max(1, Math.min(99, duty)) / 100;
+    const onTime  = Math.round(cycleMs * pct);
     const offTime = cycleMs - onTime;
-
-    document.getElementById("freq").innerText =
-        "Rate: " + (1000 / cycleMs).toFixed(2) + " Hz  |  ON: " + onTime + " ms  OFF: " + offTime + " ms";
-
-    const led = document.getElementById("led");
-
+    document.getElementById('freq').textContent =
+        'Rate: ' + (1000 / cycleMs).toFixed(2) + ' Hz  |  ON: ' + onTime + ' ms  OFF: ' + offTime + ' ms';
+    const led = document.getElementById('led');
     function blink() {
-        if (isOn) {
-            led.style.background = "black";
-            led.style.boxShadow = "0 0 20px #000";
-            blinkTimeoutId = setTimeout(blink, offTime);
+        if (blinkOn) {
+            led.style.background = '#1a1a1a';
+            led.style.boxShadow  = '0 0 8px #000';
+            blinkId = setTimeout(blink, offTime);
         } else {
             led.style.background = color;
-            led.style.boxShadow =
-                "0 0 40px " + color + ", 0 0 80px " + color;
-            blinkTimeoutId = setTimeout(blink, onTime);
+            led.style.boxShadow  = '0 0 30px ' + color + ', 0 0 60px ' + color;
+            blinkId = setTimeout(blink, onTime);
         }
-        isOn = !isOn;
+        blinkOn = !blinkOn;
     }
-
     blink();
 }
 
 function stopBlink() {
-    if (blinkTimeoutId !== null) {
-        clearTimeout(blinkTimeoutId);
-        blinkTimeoutId = null;
-    }
-    document.getElementById("led").style.background = "black";
-    document.getElementById("led").style.boxShadow = "0 0 20px #000";
-    isOn = false;
+    if (blinkId) { clearTimeout(blinkId); blinkId = null; }
+    document.getElementById('led').style.background = '#1a1a1a';
+    document.getElementById('led').style.boxShadow  = '0 0 8px #000';
+    blinkOn = false;
 }
 
-/* ─── Permanent Fault simulator ─── */
+/* ══════════════════════════════════════════
+   SEQUENCE LIBRARY
+   All timings in milliseconds.
+   Format per channel: [on_1, off_1, on_2, off_2, ...]
+   alternating: true → B starts offset by R[0] ms so they interleave
+   gap: pause (ms) appended after the sequence ends before looping
+══════════════════════════════════════════ */
 
-const BLINK_MS   = 100;   // on-time per pulse
-const GAP_MS     = 1000;  // pause between pattern repetitions
+const SEQUENCES = {
+    'Init': {
+        R: [], G: [], B: [50,50,50,50,50,50],
+        gap: 0,
+        desc: 'Blue fast blink · 100 ms cycle @ 50 %'
+    },
+    'Wait 1': {
+        R: [], G: [250,1750,250,1750,250,1750], B: [],
+        gap: 0,
+        desc: 'Green · 1 pulse per 2 s cycle'
+    },
+    'Wait 2': {
+        R: [], G: [250,250,250,1250,250,250,250,1250], B: [],
+        gap: 0,
+        desc: 'Green · 2 pulses per 3 s cycle'
+    },
+    'Wait 3': {
+        R: [], G: [250,250,250,250,250,750,250,250,250,250,250,750], B: [],
+        gap: 0,
+        desc: 'Green · 3 pulses per 3 s cycle'
+    },
+    'Precharge': {
+        R: [], G: [50,50,50,50,50,50], B: [],
+        gap: 0,
+        desc: 'Green fast blink · 100 ms cycle @ 50 %'
+    },
+    'Full On': {
+        R: [], G: [9000], B: [6,2994,6,2994,6,2994],
+        gap: 0,
+        desc: 'Green solid · Blue heartbeat — 3 s cycle @ 0.2 %'
+    },
+    'Software Off': {
+        R: [], G: [], B: [6,2994,6,2994,6,2994],
+        gap: 0,
+        desc: 'Blue heartbeat · 3 s cycle @ 0.2 %'
+    },
+    'Fault Delay': {
+        R: [100,400,100,400,100,400,100,1400], G: [], B: [],
+        gap: 0,
+        desc: 'Red · 500 ms @ 20 %, with 1 s guard at end'
+    },
+    'Permanent Fault Load Connection': {
+        R: [100,100,100,100], G: [], B: [100,100,100,100],
+        alternating: true, gap: 1000,
+        desc: 'R/B alternating · 2 blinks per color'
+    },
+    'Permanent Fault Overload': {
+        R: [100,100,100,100,100,100], G: [], B: [100,100,100,100,100,100],
+        alternating: true, gap: 1000,
+        desc: 'R/B alternating · 3 blinks per color'
+    },
+    'Permanent Fault Transmitter': {
+        R: [100,100,100,100,100,100,100,100], G: [], B: [100,100,100,100,100,100,100,100],
+        alternating: true, gap: 1000,
+        desc: 'R/B alternating · 4 blinks per color'
+    },
+    'Permanent Fault Temperature': {
+        R: [100,100,100,100,100,100,100,100,100,100], G: [], B: [100,100,100,100,100,100,100,100,100,100],
+        alternating: true, gap: 1000,
+        desc: 'R/B alternating · 5 blinks per color'
+    },
+    'Permanent Fault Short Circuit': {
+        R: [100,100,100,100,100,100,100,100,100,100,100,100], G: [], B: [100,100,100,100,100,100,100,100,100,100,100,100],
+        alternating: true, gap: 1000,
+        desc: 'R/B alternating · 6 blinks per color'
+    },
+    'Permanent Fault Internal Failure': {
+        R: [100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+        G: [],
+        B: [100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+        alternating: true, gap: 1000,
+        desc: 'R/B alternating · 8 blinks per color'
+    },
+    'Live ID': {
+        R: [], G: [], B: [250,750,250,750,250,750,250,750],
+        gap: 0,
+        desc: 'Blue slow blink · 1 s cycle @ 25 %'
+    }
+};
 
-let faultTimeoutId = null;
-let faultStep      = 0;
-let faultSeq       = [];  // [{r, b, ms}, ...]
+const CH_COLOR = { R: '#ff2200', G: '#00dd44', B: '#1155ff' };
+
+let slIds = []; // all active timeout IDs
+
+function setSlLed(ch, on) {
+    const el = document.getElementById('sl-' + ch.toLowerCase());
+    el.classList.toggle('on-' + ch.toLowerCase(), on);
+}
 
 /**
- * Build the alternating R/B sequence for `blinks` pulses per color.
- * R starts first. A gap frame is appended so the pattern pauses before looping.
+ * Play one channel's timing sequence in a looping recursive timeout chain.
+ * idx: position in the timings array (even = on, odd = off)
+ * startDelay: initial delay before the first step fires (ms)
  */
-function buildFaultSequence(blinks) {
-    const seq = [];
-    for (let i = 0; i < blinks; i++) {
-        seq.push({ r: true,  b: false, ms: BLINK_MS });
-        seq.push({ r: false, b: true,  ms: BLINK_MS });
-    }
-    seq.push({ r: false, b: false, ms: GAP_MS });
-    return seq;
-}
-
-function buildDots(blinks) {
-    const container = document.getElementById("step-dots");
-    container.innerHTML = "";
-    for (let i = 0; i < blinks; i++) {
-        const dr = document.createElement("div");
-        dr.className = "step-dot";
-        dr.dataset.step = i * 2;
-        container.appendChild(dr);
-
-        const db = document.createElement("div");
-        db.className = "step-dot";
-        db.dataset.step = i * 2 + 1;
-        container.appendChild(db);
-    }
-}
-
-function updateDots(step) {
-    document.querySelectorAll(".step-dot").forEach(dot => {
-        dot.classList.remove("active-r", "active-b");
-        if (parseInt(dot.dataset.step) === step) {
-            dot.classList.add(step % 2 === 0 ? "active-r" : "active-b");
+function playChannel(ch, timings, gapMs, startDelay) {
+    function run(idx) {
+        if (idx >= timings.length) {
+            setSlLed(ch, false);
+            slIds.push(setTimeout(() => run(0), Math.max(0, gapMs)));
+            return;
         }
+        setSlLed(ch, idx % 2 === 0);
+        slIds.push(setTimeout(() => run(idx + 1), timings[idx]));
+    }
+    slIds.push(setTimeout(() => run(0), startDelay));
+}
+
+function stopSeq() {
+    slIds.forEach(clearTimeout);
+    slIds = [];
+    ['R', 'G', 'B'].forEach(ch => setSlLed(ch, false));
+}
+
+function startSeq() {
+    stopSeq();
+    const seq = SEQUENCES[document.getElementById('sl-select').value];
+
+    // Mark which channels are used
+    ['R', 'G', 'B'].forEach(ch => {
+        document.getElementById('sl-' + ch.toLowerCase())
+            .classList.toggle('inactive', seq[ch].length === 0);
     });
-}
 
-function applyFaultFrame(frame) {
-    const ledR = document.getElementById("fault-led-r");
-    const ledB = document.getElementById("fault-led-b");
-
-    if (frame.r) {
-        ledR.classList.add("on-red");
-    } else {
-        ledR.classList.remove("on-red");
-    }
-
-    if (frame.b) {
-        ledB.classList.add("on-blue");
-    } else {
-        ledB.classList.remove("on-blue");
+    if (seq.R.length) playChannel('R', seq.R, seq.gap, 0);
+    if (seq.G.length) playChannel('G', seq.G, seq.gap, 0);
+    if (seq.B.length) {
+        // Permanent fault: B starts one slot after R (offset = R[0]) so they truly alternate
+        const bDelay = seq.alternating ? (seq.R[0] || 0) : 0;
+        playChannel('B', seq.B, seq.gap, bDelay);
     }
 }
 
-function runFaultStep() {
-    const frame = faultSeq[faultStep];
-    applyFaultFrame(frame);
-
-    // Update progress dots (only for blink frames, not gap)
-    if (faultStep < faultSeq.length - 1) {
-        updateDots(faultStep);
-    } else {
-        updateDots(-1); // clear during gap
-    }
-
-    document.getElementById("fault-info").innerText =
-        faultStep < faultSeq.length - 1
-            ? "Step " + (faultStep + 1) + " / " + (faultSeq.length - 1) +
-              "  —  " + (frame.r ? "RED on" : "BLUE on")
-            : "Gap — next cycle in " + GAP_MS + " ms";
-
-    const nextStep = (faultStep + 1) % faultSeq.length;
-    faultStep = nextStep;
-    faultTimeoutId = setTimeout(runFaultStep, frame.ms);
+function onSlChange() {
+    const name = document.getElementById('sl-select').value;
+    document.getElementById('sl-desc').textContent = SEQUENCES[name].desc;
+    // Update inactive state without touching playback
+    const seq = SEQUENCES[name];
+    ['R', 'G', 'B'].forEach(ch => {
+        document.getElementById('sl-' + ch.toLowerCase())
+            .classList.toggle('inactive', seq[ch].length === 0);
+    });
+    if (slIds.length) startSeq(); // restart if already playing
 }
 
-function startFault() {
-    stopFault();
-
-    const blinks = parseInt(document.getElementById("fault-select").value, 10);
-    faultSeq  = buildFaultSequence(blinks);
-    faultStep = 0;
-
-    buildDots(blinks);
-    runFaultStep();
-}
-
-function stopFault() {
-    if (faultTimeoutId !== null) {
-        clearTimeout(faultTimeoutId);
-        faultTimeoutId = null;
-    }
-    document.getElementById("fault-led-r").classList.remove("on-red");
-    document.getElementById("fault-led-b").classList.remove("on-blue");
-    document.getElementById("fault-info").innerText = "";
-    updateDots(-1);
-    faultStep = 0;
-}
-
-function onFaultChange() {
-    const blinks = parseInt(document.getElementById("fault-select").value, 10);
-    const patternMs = blinks * 2 * BLINK_MS;
-    document.getElementById("fault-badge").innerText =
-        blinks + " blinks per color  |  " + patternMs + " ms pattern  |  " + GAP_MS + " ms gap";
-
-    // Restart if already running
-    if (faultTimeoutId !== null) startFault();
-}
+// Init on load
+window.addEventListener('DOMContentLoaded', onSlChange);
 </script>
 
 </body>
