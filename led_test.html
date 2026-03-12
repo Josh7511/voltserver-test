@@ -18,7 +18,6 @@
         border-radius: 50%;
         background: black;
         box-shadow: 0 0 20px #000;
-        /* transition removed for instant switching */
     }
 
     .controls {
@@ -33,6 +32,112 @@
         padding: 10px 20px;
         margin: 10px;
         font-size: 16px;
+    }
+
+    /* ── Permanent Fault section ── */
+    .section-divider {
+        border-top: 1px solid #444;
+        margin: 40px auto;
+        padding-top: 30px;
+        max-width: 600px;
+    }
+
+    .led-pair {
+        display: flex;
+        justify-content: center;
+        gap: 60px;
+        margin: 30px auto;
+    }
+
+    .led-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .led-container label {
+        font-size: 14px;
+        letter-spacing: 1px;
+        color: #aaa;
+        text-transform: uppercase;
+    }
+
+    .led-dual {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: #1a1a1a;
+        box-shadow: 0 0 10px #000;
+        border: 2px solid #333;
+    }
+
+    .led-dual.on-red {
+        background: #ff2200;
+        box-shadow: 0 0 30px #ff2200, 0 0 60px #ff2200;
+        border-color: #ff5533;
+    }
+
+    .led-dual.on-blue {
+        background: #0044ff;
+        box-shadow: 0 0 30px #0044ff, 0 0 60px #0044ff;
+        border-color: #3366ff;
+    }
+
+    #fault-select {
+        font-size: 15px;
+        padding: 6px 10px;
+        background: #222;
+        color: white;
+        border: 1px solid #555;
+        border-radius: 4px;
+        min-width: 240px;
+    }
+
+    .fault-badge {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 4px 14px;
+        background: #222;
+        border: 1px solid #555;
+        border-radius: 20px;
+        font-size: 13px;
+        color: #ccc;
+        letter-spacing: 0.5px;
+    }
+
+    #fault-info {
+        font-size: 14px;
+        color: #888;
+        min-height: 1.4em;
+    }
+
+    .step-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin: 16px auto;
+        flex-wrap: wrap;
+        max-width: 400px;
+    }
+
+    .step-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #333;
+        border: 1px solid #555;
+        transition: background 0.05s;
+    }
+
+    .step-dot.active-r {
+        background: #ff2200;
+        box-shadow: 0 0 6px #ff2200;
+    }
+
+    .step-dot.active-b {
+        background: #0044ff;
+        box-shadow: 0 0 6px #0044ff;
     }
 </style>
 
@@ -71,7 +176,55 @@
 
 <p id="freq"></p>
 
+<!-- ═══════════════════════════════════════════════════ -->
+<!--              PERMANENT FAULT FAMILY                 -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section-divider">
+    <h2>Permanent Fault Family</h2>
+    <p style="color:#888; font-size:13px; margin-top:-10px;">
+        Red &amp; Blue alternate every 100 ms — blink count encodes the fault type
+    </p>
+
+    <div class="led-pair">
+        <div class="led-container">
+            <div id="fault-led-r" class="led-dual"></div>
+            <label>Red</label>
+        </div>
+        <div class="led-container">
+            <div id="fault-led-b" class="led-dual"></div>
+            <label>Blue</label>
+        </div>
+    </div>
+
+    <div class="step-indicator" id="step-dots"></div>
+
+    <div class="controls">
+        <label>Fault Type:</label><br><br>
+        <select id="fault-select" onchange="onFaultChange()">
+            <option value="2">Load Connection &nbsp;— 2 blinks</option>
+            <option value="3">Overload &nbsp;— 3 blinks</option>
+            <option value="4">Transmitter &nbsp;— 4 blinks</option>
+            <option value="5">Temperature &nbsp;— 5 blinks</option>
+            <option value="6">Short Circuit &nbsp;— 6 blinks</option>
+            <option value="8">Internal Failure &nbsp;— 8 blinks</option>
+        </select>
+    </div>
+
+    <div id="fault-badge-row" style="margin:10px 0;">
+        <span class="fault-badge" id="fault-badge">2 blinks per color &nbsp;|&nbsp; 400 ms pattern &nbsp;|&nbsp; 1 s gap</span>
+    </div>
+
+    <div class="controls">
+        <button onclick="startFault()">Start</button>
+        <button onclick="stopFault()">Stop</button>
+    </div>
+
+    <p id="fault-info"></p>
+</div>
+
 <script>
+/* ─── Single-LED blink simulator ─── */
+
 let blinkTimeoutId = null;
 let isOn = false;
 
@@ -117,6 +270,126 @@ function stopBlink() {
     document.getElementById("led").style.background = "black";
     document.getElementById("led").style.boxShadow = "0 0 20px #000";
     isOn = false;
+}
+
+/* ─── Permanent Fault simulator ─── */
+
+const BLINK_MS   = 100;   // on-time per pulse
+const GAP_MS     = 1000;  // pause between pattern repetitions
+
+let faultTimeoutId = null;
+let faultStep      = 0;
+let faultSeq       = [];  // [{r, b, ms}, ...]
+
+/**
+ * Build the alternating R/B sequence for `blinks` pulses per color.
+ * R starts first. A gap frame is appended so the pattern pauses before looping.
+ */
+function buildFaultSequence(blinks) {
+    const seq = [];
+    for (let i = 0; i < blinks; i++) {
+        seq.push({ r: true,  b: false, ms: BLINK_MS });
+        seq.push({ r: false, b: true,  ms: BLINK_MS });
+    }
+    seq.push({ r: false, b: false, ms: GAP_MS });
+    return seq;
+}
+
+function buildDots(blinks) {
+    const container = document.getElementById("step-dots");
+    container.innerHTML = "";
+    for (let i = 0; i < blinks; i++) {
+        const dr = document.createElement("div");
+        dr.className = "step-dot";
+        dr.dataset.step = i * 2;
+        container.appendChild(dr);
+
+        const db = document.createElement("div");
+        db.className = "step-dot";
+        db.dataset.step = i * 2 + 1;
+        container.appendChild(db);
+    }
+}
+
+function updateDots(step) {
+    document.querySelectorAll(".step-dot").forEach(dot => {
+        dot.classList.remove("active-r", "active-b");
+        if (parseInt(dot.dataset.step) === step) {
+            dot.classList.add(step % 2 === 0 ? "active-r" : "active-b");
+        }
+    });
+}
+
+function applyFaultFrame(frame) {
+    const ledR = document.getElementById("fault-led-r");
+    const ledB = document.getElementById("fault-led-b");
+
+    if (frame.r) {
+        ledR.classList.add("on-red");
+    } else {
+        ledR.classList.remove("on-red");
+    }
+
+    if (frame.b) {
+        ledB.classList.add("on-blue");
+    } else {
+        ledB.classList.remove("on-blue");
+    }
+}
+
+function runFaultStep() {
+    const frame = faultSeq[faultStep];
+    applyFaultFrame(frame);
+
+    // Update progress dots (only for blink frames, not gap)
+    if (faultStep < faultSeq.length - 1) {
+        updateDots(faultStep);
+    } else {
+        updateDots(-1); // clear during gap
+    }
+
+    document.getElementById("fault-info").innerText =
+        faultStep < faultSeq.length - 1
+            ? "Step " + (faultStep + 1) + " / " + (faultSeq.length - 1) +
+              "  —  " + (frame.r ? "RED on" : "BLUE on")
+            : "Gap — next cycle in " + GAP_MS + " ms";
+
+    const nextStep = (faultStep + 1) % faultSeq.length;
+    faultStep = nextStep;
+    faultTimeoutId = setTimeout(runFaultStep, frame.ms);
+}
+
+function startFault() {
+    stopFault();
+
+    const blinks = parseInt(document.getElementById("fault-select").value, 10);
+    faultSeq  = buildFaultSequence(blinks);
+    faultStep = 0;
+
+    buildDots(blinks);
+    runFaultStep();
+}
+
+function stopFault() {
+    if (faultTimeoutId !== null) {
+        clearTimeout(faultTimeoutId);
+        faultTimeoutId = null;
+    }
+    document.getElementById("fault-led-r").classList.remove("on-red");
+    document.getElementById("fault-led-b").classList.remove("on-blue");
+    document.getElementById("fault-info").innerText = "";
+    updateDots(-1);
+    faultStep = 0;
+}
+
+function onFaultChange() {
+    const blinks = parseInt(document.getElementById("fault-select").value, 10);
+    const patternMs = blinks * 2 * BLINK_MS;
+    document.getElementById("fault-badge").innerText =
+        blinks + " blinks per color  |  " + patternMs + " ms pattern  |  " + GAP_MS + " ms gap";
+
+    // Restart if already running
+    if (faultTimeoutId !== null) startFault();
 }
 </script>
 
