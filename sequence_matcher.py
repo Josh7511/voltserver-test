@@ -52,6 +52,23 @@ def dtw_distance(a: list[float], b: list[float]) -> float:
     return math.sqrt(dp[n][m])
 
 
+def trim_trailing_silence(seq: list[float]) -> list[float]:
+    """Strip the final off-period when it is an inter-sequence gap, not part of the pattern.
+
+    Only acts on sequences of 4+ elements ending with an off-time that exceeds
+    2x the median on-time. Shorter sequences (e.g. Software Off's 2-element
+    [on, long_off]) are left untouched so their long off remains part of the match.
+    """
+    if len(seq) < 4 or len(seq) % 2 != 0:
+        return seq
+    on_times = seq[0::2]
+    n = len(on_times)
+    median_on = (sorted(on_times)[(n - 1) // 2] + sorted(on_times)[n // 2]) / 2
+    if seq[-1] > median_on * 2:
+        return seq[:-1]
+    return seq
+
+
 def _score_channel(detected: list[float], known: list[float]) -> float:
     """Return DTW distance between two normalized single-cycle sequences.
 
@@ -61,7 +78,7 @@ def _score_channel(detected: list[float], known: list[float]) -> float:
     """
     if not detected or not known:
         return math.inf
-    nd = normalize(extract_one_cycle(detected))
+    nd = normalize(extract_one_cycle(trim_trailing_silence(detected)))
     nk = normalize(extract_one_cycle(known))
     return dtw_distance(nd, nk)
 

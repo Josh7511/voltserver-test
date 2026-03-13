@@ -8,7 +8,7 @@ def remove_leading_zeros(sequence: list):
     return list(dropwhile(lambda x: x == 0, sequence))
 
 
-def remove_short_on_runs(sequence: list, min_run: int = 4) -> list:
+def remove_short_on_runs(sequence: list, min_run: int = 2) -> list:
     """Zero out any contiguous run of 1s shorter than min_run frames.
 
     At ~26 fps a run of 4 frames = ~154 ms, which is the practical minimum
@@ -98,7 +98,7 @@ while True:
     mask_g = cv2.inRange(hsv, lower_green, upper_green)
 
     # Blue
-    lower_blue = np.array([100, 150, 80])
+    lower_blue = np.array([100, 140, 70])
     upper_blue = np.array([140, 255, 255])
     mask_b = cv2.inRange(hsv, lower_blue, upper_blue)
 
