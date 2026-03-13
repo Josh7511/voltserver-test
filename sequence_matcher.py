@@ -4,6 +4,25 @@ from sequence import BLINK_SEQUENCES
 MATCH_THRESHOLD = 0.5
 
 
+def extract_one_cycle(seq: list[float]) -> list[float]:
+    """Return the first complete blink cycle from a sequence.
+
+    A cycle ends at the first off-time (odd index) that exceeds 2x the median
+    on-time. If no such gap exists (e.g. all intervals equal) the full sequence
+    is returned unchanged, which is correct for Init/Precharge/Permanent-Fault.
+    """
+    if len(seq) < 2:
+        return seq
+    on_times = sorted(seq[0::2])
+    n = len(on_times)
+    median_on = (on_times[(n - 1) // 2] + on_times[n // 2]) / 2
+    threshold = median_on * 2.0
+    for i in range(1, len(seq), 2):
+        if seq[i] > threshold:
+            return seq[: i + 1]
+    return seq
+
+
 def normalize(seq: list[float]) -> list[float]:
     """Divide each element by total duration so scale differences don't affect matching."""
     total = sum(seq)
@@ -34,13 +53,17 @@ def dtw_distance(a: list[float], b: list[float]) -> float:
 
 
 def _score_channel(detected: list[float], known: list[float]) -> float:
-    """Return DTW distance between two normalized sequences.
+    """Return DTW distance between two normalized single-cycle sequences.
 
+    Extracts one representative cycle from both sequences before comparing so
+    the result is independent of how many cycles the video happened to capture.
     Returns inf if either sequence is empty.
     """
     if not detected or not known:
         return math.inf
-    return dtw_distance(normalize(detected), normalize(known))
+    nd = normalize(extract_one_cycle(detected))
+    nk = normalize(extract_one_cycle(known))
+    return dtw_distance(nd, nk)
 
 
 def match_sequence(

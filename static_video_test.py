@@ -8,6 +8,28 @@ def remove_leading_zeros(sequence: list):
     return list(dropwhile(lambda x: x == 0, sequence))
 
 
+def remove_short_on_runs(sequence: list, min_run: int = 4) -> list:
+    """Zero out any contiguous run of 1s shorter than min_run frames.
+
+    At ~26 fps a run of 4 frames = ~154 ms, which is the practical minimum
+    detectable pulse for the states of interest. Shorter runs are noise.
+    """
+    seq = sequence[:]
+    i = 0
+    while i < len(seq):
+        if seq[i] == 1:
+            j = i
+            while j < len(seq) and seq[j] == 1:
+                j += 1
+            if j - i < min_run:
+                for k in range(i, j):
+                    seq[k] = 0
+            i = j
+        else:
+            i += 1
+    return seq
+
+
 def largest_cluster_area(mask) -> float:
     """Return the area of the largest single connected component in a binary mask."""
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -18,6 +40,8 @@ def largest_cluster_area(mask) -> float:
 
 def build_time_sequence(sequence: list, fps: float) -> tuple[list[list[int]], list[float]]:
     """Segment a binary sequence into runs and convert each run to a duration in seconds."""
+    if not sequence:
+        return [], []
     list_result = [[]]
     for i in range(len(sequence)):
         if i > 0 and sequence[i] != sequence[i - 1]:
@@ -113,9 +137,10 @@ cap.release()
 cv2.destroyAllWindows()
 
 # Strip leading silence and denoise each channel
-sequence_r = flip_correct(remove_leading_zeros(sequence_r))
-sequence_g = flip_correct(remove_leading_zeros(sequence_g))
-sequence_b = flip_correct(remove_leading_zeros(sequence_b))
+sequence_r = flip_correct(remove_leading_zeros(remove_short_on_runs(sequence_r)))
+sequence_g = flip_correct(remove_leading_zeros(remove_short_on_runs(sequence_g)))
+
+sequence_b = flip_correct(remove_leading_zeros(remove_short_on_runs(sequence_b)))
 
 list_result_r, time_sequence_r = build_time_sequence(sequence_r, fps)
 list_result_g, time_sequence_g = build_time_sequence(sequence_g, fps)
