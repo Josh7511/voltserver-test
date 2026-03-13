@@ -98,7 +98,7 @@ while True:
     mask_g = cv2.inRange(hsv, lower_green, upper_green)
 
     # Blue
-    lower_blue = np.array([100, 80, 40])
+    lower_blue = np.array([100, 150, 80])
     upper_blue = np.array([140, 255, 255])
     mask_b = cv2.inRange(hsv, lower_blue, upper_blue)
 
