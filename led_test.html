@@ -9,8 +9,8 @@
     body {
         font-family: Arial, sans-serif;
         text-align: center;
-        background: #111;
-        color: white;
+        background: #fff;
+        color: #000;
         margin: 0;
         padding: 0 0 60px;
     }
@@ -19,14 +19,14 @@
     h2 { margin: 0 0 4px; font-size: 19px; }
 
     .panel {
-        border-top: 1px solid #333;
+        border-top: 1px solid #d0d0d0;
         max-width: 700px;
         margin: 0 auto;
         padding: 28px 20px;
     }
 
     .subtitle {
-        color: #666;
+        color: #444;
         font-size: 13px;
         margin: 2px 0 18px;
     }
@@ -36,9 +36,9 @@
     input[type=number] {
         width: 110px;
         padding: 5px 8px;
-        background: #1e1e1e;
-        color: white;
-        border: 1px solid #444;
+        background: #fff;
+        color: #000;
+        border: 1px solid #bbb;
         border-radius: 4px;
         font-size: 14px;
     }
@@ -46,9 +46,9 @@
     select {
         font-size: 14px;
         padding: 6px 10px;
-        background: #1e1e1e;
-        color: white;
-        border: 1px solid #444;
+        background: #fff;
+        color: #000;
+        border: 1px solid #bbb;
         border-radius: 4px;
         cursor: pointer;
     }
@@ -57,13 +57,13 @@
         padding: 8px 20px;
         margin: 5px;
         font-size: 14px;
-        background: #252525;
-        color: white;
-        border: 1px solid #444;
+        background: #f3f3f3;
+        color: #000;
+        border: 1px solid #bbb;
         border-radius: 4px;
         cursor: pointer;
     }
-    button:hover { background: #333; }
+    button:hover { background: #e7e7e7; }
 
     /* ── Generic blink LED ── */
     #led {
@@ -71,12 +71,12 @@
         height: 160px;
         margin: 24px auto;
         border-radius: 50%;
-        background: #1a1a1a;
-        box-shadow: 0 0 8px #000;
-        border: 2px solid #2a2a2a;
+        background: #f2f2f2;
+        box-shadow: 0 0 8px #cfcfcf;
+        border: 2px solid #c8c8c8;
     }
 
-    #freq { font-size: 13px; color: #666; min-height: 1.4em; }
+    #freq { font-size: 13px; color: #444; min-height: 1.4em; }
 
     /* ── Sequence Library LEDs ── */
     .sl-led-row {
@@ -95,7 +95,7 @@
 
     .sl-led-wrap label {
         font-size: 12px;
-        color: #666;
+        color: #444;
         text-transform: uppercase;
         letter-spacing: 2px;
     }
@@ -104,8 +104,8 @@
         width: 88px;
         height: 88px;
         border-radius: 50%;
-        background: #1a1a1a;
-        border: 2px solid #2a2a2a;
+        background: #f2f2f2;
+        border: 2px solid #c8c8c8;
         transition: opacity 0.08s;
     }
 
@@ -130,7 +130,7 @@
     /* ── Description / info text ── */
     #sl-desc {
         font-size: 13px;
-        color: #777;
+        color: #444;
         margin: 6px 0 0;
         min-height: 1.4em;
     }
@@ -254,8 +254,8 @@ function startBlink() {
     const led = document.getElementById('led');
     function blink() {
         if (blinkOn) {
-            led.style.background = '#1a1a1a';
-            led.style.boxShadow  = '0 0 8px #000';
+            led.style.background = '#f2f2f2';
+            led.style.boxShadow  = '0 0 8px #cfcfcf';
             blinkId = setTimeout(blink, offTime);
         } else {
             led.style.background = color;
@@ -269,8 +269,8 @@ function startBlink() {
 
 function stopBlink() {
     if (blinkId) { clearTimeout(blinkId); blinkId = null; }
-    document.getElementById('led').style.background = '#1a1a1a';
-    document.getElementById('led').style.boxShadow  = '0 0 8px #000';
+    document.getElementById('led').style.background = '#f2f2f2';
+    document.getElementById('led').style.boxShadow  = '0 0 8px #cfcfcf';
     blinkOn = false;
 }
 
